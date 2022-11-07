@@ -1,6 +1,5 @@
 ﻿using System;
 using Commands;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Managers
@@ -35,7 +34,8 @@ namespace Managers
         {
             _levelData = GetLevelData();
             levelID = GetActiveLevel();
-            
+            CoreGameSignals.Instance.onLevelInitialize += _levelLoaderCommand.Execute;
+
             Init();
         }
         
@@ -50,7 +50,6 @@ namespace Managers
             CoreGameSignals.Instance.onClearActiveLevel += _levelDestroyerCommand.Execute;
             CoreGameSignals.Instance.onNextLevel += OnNextLevel;
             CoreGameSignals.Instance.onRestartLevel += OnRestartLevel;
-            
         }
 
         private void UnSubscribeEvents()
