@@ -1,8 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    #region  Self Variables
+    #region Self Variables
 
     #region Serialized Variables
 
@@ -11,33 +13,27 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #endregion
-
-
     private void Awake()
     {
         Application.targetFrameRate = 60;
     }
-
     private void OnEnable()
     {
         SubscribeEvents();
     }
-
     private void SubscribeEvents()
     {
-        CoreGameSignals.Instance.onChangeGameState += OnChangeGameState;
+        CoreGameSignals.Instance.OnChangeGameState += OnChangeGameState;
     }
-    private void UnsubscribeEvents()
+    private void UnSubscribeEvents()
     {
-        CoreGameSignals.Instance.onChangeGameState -= OnChangeGameState;
+        CoreGameSignals.Instance.OnChangeGameState += OnChangeGameState;
     }
-
     private void OnDisable()
     {
-        UnsubscribeEvents();
+
     }
     
-     
     private void OnChangeGameState(GameStates state)
     {
         states = state;

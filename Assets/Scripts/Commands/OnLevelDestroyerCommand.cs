@@ -1,4 +1,3 @@
-﻿using System.Collections.Generic;
 using Interfaces;
 using UnityEngine;
 
@@ -13,15 +12,15 @@ namespace Commands
         {
             _levelHolder = levelHolder;
         }
-        
+
+
         public void Execute()
         {
             Object.Destroy(_levelHolder.GetChild(0).gameObject);
         }
-        
+
         public void Execute(int value)
         {
-            
         }
     }
 }
