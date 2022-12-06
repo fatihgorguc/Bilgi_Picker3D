@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 
 public class UIPanelController : MonoBehaviour
@@ -48,7 +48,7 @@ public class UIPanelController : MonoBehaviour
             if (layers[i].childCount > 0)
             {
                 Destroy(layers[i].GetChild(0).gameObject);
-        }
+            }
         }
         
     }
