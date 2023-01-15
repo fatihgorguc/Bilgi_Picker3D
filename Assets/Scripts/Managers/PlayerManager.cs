@@ -176,8 +176,6 @@ namespace Managers
 
         }
         
-
-
         private void OnReset()
         {
             StageValue = 0;
