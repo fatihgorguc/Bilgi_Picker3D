@@ -42,7 +42,7 @@ namespace Managers
         private void UnSubscribeEvents()
         {
             CameraSignals.Instance.onSetCameraTarget -= OnSetCameraTarget;
-            CoreGameSignals.Instance.onReset += OnReset;
+            CoreGameSignals.Instance.onReset -= OnReset;
         }
 
         private void OnDisable()
