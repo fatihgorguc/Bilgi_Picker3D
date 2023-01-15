@@ -1,3 +1,4 @@
+using Commands.Player;
 using Controllers.Player;
 using Data.UnityObjects;
 using Data.ValueObjects;
@@ -12,12 +13,20 @@ namespace Managers
     {
         #region Self Variables
 
+        #region Public Variables
+
+        public byte StageValue = 0;
+
+        internal ForceBallsToPoolCommand ForceCommand;
+
+        #endregion
+
         #region Serialized Variables
 
         [SerializeField] private PlayerMovementController movementController;
         [SerializeField] private PlayerPhysicsController physicsController;
         [SerializeField] private PlayerMeshController meshController;
-        
+
         #endregion
 
         #region Private Variables
@@ -32,13 +41,19 @@ namespace Managers
         {
             _data = GetPlayerData();
             SendDataToControllers();
+            Init();
+        }
+
+        private void Init()
+        {
+            ForceCommand = new ForceBallsToPoolCommand(this, _data.MovementData);
         }
 
         private PlayerData GetPlayerData()
         {
             return Resources.Load<CD_Player>("Data/CD_Player").Data;
         }
-        
+
         private void SendDataToControllers()
         {
             movementController.GetMovementData(_data.MovementData);
@@ -59,11 +74,15 @@ namespace Managers
             CoreGameSignals.Instance.onLevelSuccessful += OnLevelSuccessful;
             CoreGameSignals.Instance.onLevelFailed += OnLevelFailed;
             CoreGameSignals.Instance.onStageAreaEntered += OnStageAreaEntered;
+            CoreGameSignals.Instance.onFinishAreaEntered += OnFinishAreaEntered;
             CoreGameSignals.Instance.onStageAreaSuccessful += OnStageAreaSuccessful;
             CoreGameSignals.Instance.onReset += OnReset;
+            //new
+            CoreGameSignals.Instance.onMinigamePoolAreaSuccessful += OnMinigamePoolAreaSuccessful;
+            CoreGameSignals.Instance.onMinigameStartAreaEntered += OnMinigameStartAreaEntered;
         }
 
-        private void UnsubscribeEvents()
+        private void UnSubscribeEvents()
         {
             InputSignals.Instance.onInputTaken -= OnInputTaken;
             InputSignals.Instance.onInputReleased -= OnInputReleased;
@@ -72,33 +91,37 @@ namespace Managers
             CoreGameSignals.Instance.onLevelSuccessful -= OnLevelSuccessful;
             CoreGameSignals.Instance.onLevelFailed -= OnLevelFailed;
             CoreGameSignals.Instance.onStageAreaEntered -= OnStageAreaEntered;
+            CoreGameSignals.Instance.onFinishAreaEntered -= OnFinishAreaEntered;
             CoreGameSignals.Instance.onStageAreaSuccessful -= OnStageAreaSuccessful;
             CoreGameSignals.Instance.onReset -= OnReset;
+            //new
+            CoreGameSignals.Instance.onMinigamePoolAreaSuccessful -= OnMinigamePoolAreaSuccessful;
+            CoreGameSignals.Instance.onMinigameStartAreaEntered -= OnMinigameStartAreaEntered;
         }
 
         private void OnDisable()
         {
-            UnsubscribeEvents();
+            UnSubscribeEvents();
         }
-        
+
         private void OnPlay()
         {
             movementController.IsReadyToPlay(true);
         }
-        
+
         private void OnInputTaken()
         {
             movementController.IsReadyToMove(true);
         }
-        
+
+        private void OnInputDragged(HorizontalnputParams inputParams)
+        {
+            movementController.UpdateInputParams(inputParams);
+        }
+
         private void OnInputReleased()
         {
             movementController.IsReadyToMove(false);
-        }
-
-        private void OnInputDragged(HorizontalInputParams inputParams)
-        {
-            movementController.UpdateInputParams(inputParams);
         }
 
         private void OnLevelSuccessful()
@@ -116,13 +139,48 @@ namespace Managers
             movementController.IsReadyToPlay(false);
         }
 
-        private void OnStageAreaSuccessful()
+        private void OnStageAreaSuccessful(int value)
         {
+            StageValue = (byte)++value;
             movementController.IsReadyToPlay(true);
+            meshController.ScaleUpPlayer();
+            meshController.ShowUpScaleText();
+            meshController.PlayConfettiParticle();
         }
+
+        private void OnFinishAreaEntered()
+        {
+            movementController.IsReadyToPlay(false);
+        }
+        
+        //new
+
+        private void OnMinigamePoolAreaSuccessful(int value)
+        {
+            StageValue = (byte)++value;
+            movementController.IncreasePlayerSpeed();
+            meshController.ShowUpSpeedText();
+            
+            meshController.IncreaseBonusValue();
+            meshController.ShowUpBonusText();
+        }
+        private void OnMinigameStartAreaEntered()
+        {
+            meshController.ScaleUpPlayer();
+            meshController.ShowUpScaleText();
+            
+            movementController.IncreasePlayerSpeed();
+            meshController.ShowUpSpeedText();
+            
+            meshController.ShowUpBonusText();
+
+        }
+        
+
 
         private void OnReset()
         {
+            StageValue = 0;
             movementController.OnReset();
             meshController.OnReset();
             physicsController.OnReset();

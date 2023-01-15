@@ -1,7 +1,8 @@
-﻿using Data.ValueObjects;
+using Data.ValueObjects;
 using Keys;
 using Managers;
 using Sirenix.OdinInspector;
+using System;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace Controllers.Player
 
         #region Serialized Variables
 
-        [SerializeField] private new PlayerManager manager;
+        [SerializeField] private PlayerManager manager;
         [SerializeField] private new Rigidbody rigidbody;
         [SerializeField] private new Collider collider;
 
@@ -29,49 +30,64 @@ namespace Controllers.Player
         #endregion
 
         #endregion
-        
-        internal void GetMovementData(MovementData dataMovementData)
+
+        internal void GetMovementData(MovementData movementData)
         {
-            _data = dataMovementData;
+            _data = movementData;
         }
 
         private void FixedUpdate()
         {
-            if (_isReadyToPlay)
+            if (!_isReadyToPlay)
             {
-                if (_isReadyToMove)
-                {
-                    MovePlayer();
-                }
-                else StopPlayerHorizontaly();
+                StopPlayer();
+                return;
             }
-            else StopPlayer();
+
+            if (_isReadyToMove)
+            {
+                MovePlayer();
+            }
+            else StopPlayerHorizontaly();
+
         }
 
         private void StopPlayerHorizontaly()
         {
-            rigidbody.velocity = new Vector3(0, rigidbody.velocity.y, _data.ForwardSpeed);
-            rigidbody.angularVelocity = Vector3.zero;
+            rigidbody.velocity = new float3(0, rigidbody.velocity.y, _data.ForwardSpeed);
+            rigidbody.angularVelocity = float3.zero;
         }
 
         private void MovePlayer()
         {
             var velocity = rigidbody.velocity;
-            velocity = new Vector3(_xValue * _data.SidewaysSpeed, velocity.y, _data.ForwardSpeed);
+            velocity = new float3(_xValue * _data.SidewaysSpeed, velocity.y,
+                _data.ForwardSpeed);
             rigidbody.velocity = velocity;
 
-            Vector3 position;
-            position = new Vector3(Mathf.Clamp(rigidbody.position.x, _clampValues.x, _clampValues.y),
-                (position = rigidbody.position).y, position.z);
+            float3 position;
+            position = new float3(
+                Mathf.Clamp(rigidbody.position.x, _clampValues.x,
+                    _clampValues.y),
+                (position = rigidbody.position).y,
+                position.z);
             rigidbody.position = position;
         }
 
         private void StopPlayer()
         {
-            rigidbody.velocity = Vector3.zero;
-            rigidbody.angularVelocity = Vector3.zero;
+            rigidbody.velocity = float3.zero;
+            rigidbody.angularVelocity = float3.zero;
         }
         
+        //new
+        
+        public void IncreasePlayerSpeed()
+        {
+            _data.ForwardSpeed += _data.SpeedUpData;
+        }
+        
+
         internal void IsReadyToPlay(bool condition)
         {
             _isReadyToPlay = condition;
@@ -81,11 +97,11 @@ namespace Controllers.Player
         {
             _isReadyToMove = condition;
         }
-        
-        internal void UpdateInputParams(HorizontalInputParams inputParams)
+        internal void UpdateInputParams(HorizontalnputParams inputParams)
         {
             _xValue = inputParams.HorizontalInputValue;
-            _clampValues = new float2(inputParams.HorizontalInputClampNegativeSide, inputParams.HorizontalInputClampPositiveSide);
+            _clampValues = new float2(inputParams.HorizontalInputClampNegativeSide,
+                inputParams.HorizontalInputClampPositiveSide);
         }
         
         internal void OnReset()
